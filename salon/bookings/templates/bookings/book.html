@@ -1,0 +1,16 @@
+{% load static %}
+{% extends "bookings/base.html" %}
+{% block content %}
+<h2>Записаться к мастеру</h2>
+
+{% if error %}
+<p style="color:red;">{{ error }}</p>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+  <label>Дата: <input type="date" name="date" required></label><br><br>
+  <label>Время: <input type="time" name="time" required></label><br><br>
+  <button type="submit">Записаться</button>
+</form>
+{% endblock %}

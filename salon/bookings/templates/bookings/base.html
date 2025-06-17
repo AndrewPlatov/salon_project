@@ -1,0 +1,17 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Запись к мастеру</title>
+</head>
+<link rel="stylesheet" href="{% static 'bookings/css/styles.css' %}">
+<body>
+<h1>Мастерская запись</h1>
+<nav>
+    <a href="{% url 'my' %}">Мои записи</a> |
+    <a href="{% url 'list_masters' %}">Мастера</a>
+</nav>
+<hr>
+{% block content %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,6 @@
+<h1>Мастера</h1>
+<ul>
+{% for master in masters %}
+    <li>{{ master.username }} - <a href="{% url 'book' master.id %}">Записаться</a></li>
+{% endfor %}
+</ul>
