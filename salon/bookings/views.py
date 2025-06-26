@@ -6,6 +6,9 @@ from datetime import timedelta
 from django.contrib.auth.models import User
 from .models import Booking
 from .forms import BookingForm
+import json
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 
 def my_page(request):
     return render(request, 'bookings/my.html')
@@ -83,3 +86,34 @@ def cancel(request, id):
     booking = get_object_or_404(Booking, id=id, user=request.user)
     booking.delete()
     return redirect('my')
+
+# ТАБЛИЦА УМНОЖЕНИЯ
+@csrf_exempt
+def generate_mult_table(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        size = data.get('size', 10)
+        
+        # Генерация HTML таблицы умножения
+        html = '<table border="1" cellpadding="5">'
+        
+        # Заголовки колонок
+        html += '<tr><th></th>'
+        for i in range(1, size + 1):
+            html += f'<th>{i}</th>'
+        html += '</tr>'
+        
+        # Строки таблицы
+        for i in range(1, size + 1):
+            html += f'<tr><th>{i}</th>'
+            for j in range(1, size + 1):
+                html += f'<td>{i * j}</td>'
+            html += '</tr>'
+        
+        html += '</table>'
+        
+        return HttpResponse(html)
+    else:
+        return HttpResponse(status=405)
+    
+# в Django означает, что сервер получил запрос с методом, который не разрешён для данного ресурса
