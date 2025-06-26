@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Моя лента</title>
+</head>
+<body>
+<h1>Моя лента</h1>
+{% if posts %}
+    <ul>
+        {% for post in posts %}
+            <li>
+                <strong>{{ post.author.username }}</strong> ({{ post.created_at }}):<br>
+                {{ post.content }}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Нет постов в вашей ленте.</p>
+{% endif %}
+</body>
+</html>

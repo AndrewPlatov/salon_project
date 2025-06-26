@@ -9,4 +9,5 @@ urlpatterns = [
     path('base/', views.base_page, name='base'),
     path('masters/', views.list_masters, name='list_masters'),
     path('generate-mult-table/', views.generate_mult_table),
+    path('feed/', views.feed, name='feed'),
 ]

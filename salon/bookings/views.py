@@ -4,11 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib.auth.models import User
-from .models import Booking
 from .forms import BookingForm
 import json
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from .models import Post, Subscription
 
 def my_page(request):
     return render(request, 'bookings/my.html')
@@ -117,3 +117,15 @@ def generate_mult_table(request):
         return HttpResponse(status=405)
     
 # в Django означает, что сервер получил запрос с методом, который не разрешён для данного ресурса
+
+# ПОСТЫ
+@login_required
+def feed(request):
+    user = request.user
+    # Получаем список пользователей, на которых подписан текущий пользователь
+    subscriptions = Subscription.objects.filter(subscriber=user).values_list('subscribed_to', flat=True)
+    
+    # Получаем посты авторов из этого списка, сортируем по дате (от новых к старым)
+    posts = Post.objects.filter(author__in=subscriptions).order_by('-created_at')
+    
+    return render(request, 'feed.html', {'posts': posts})
