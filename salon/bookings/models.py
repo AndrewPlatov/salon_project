@@ -37,3 +37,25 @@ class Post(models.Model):
 
     def __str__(self):
         return f"Пост {self.id} от {self.author.username}"
+    
+
+
+class Task(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'В ожидании'),
+        ('in_progress', 'В процессе'),
+        ('completed', 'Завершена'),
+    ]
+
+    title = models.CharField(max_length=200, verbose_name='Название задачи')
+    description = models.TextField(blank=True, verbose_name='Описание')
+    deadline = models.DateTimeField(verbose_name='Дедлайн')
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        verbose_name='Статус'
+    )
+
+    def __str__(self):
+        return self.title

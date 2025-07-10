@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Booking
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from datetime import timedelta
+from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from .forms import BookingForm
 import json
@@ -129,3 +129,114 @@ def feed(request):
     posts = Post.objects.filter(author__in=subscriptions).order_by('-created_at')
     
     return render(request, 'feed.html', {'posts': posts})
+
+from datetime import datetime, timedelta
+def calendar(request):
+    dt = datetime.now()
+    if 'dt' in request.GET:
+        dt = datetime.strptime(
+            request.GET['dt'],
+            '%Y%m%d'
+        )
+    print(dt)
+    return render(
+        request,
+        'bookings/timetable.html',
+        timeslots(dt)
+    )
+
+def timeslots(dt, period = 7, daystart = 8, dayend = 18):
+    result = []
+    dt = datetime(
+        dt.year, dt.month, dt.day
+    )
+    for i in range(period):
+        # Прибавить к дате количество дней, равное i
+        day = {
+            'weekday': dt.strftime('%a'),
+            'slots': []
+        }
+        for h in range(daystart, dayend + 1):
+            dt_h = dt + timedelta(seconds = 3600 * h)
+            day['slots'].append({
+                'time': dt_h.strftime('%H:%M'),
+                'dt':   dt_h.strftime('%Y%m%d%H%M'),
+                'client': ''
+            })
+        result.append(day)
+        # Создать словарь, хранящий день недели и 
+        # Массив слотов, где каждый слот содержит
+        #     время для отображения
+        #     дату и время для записи
+        #     клиента при наличии 
+        dt += timedelta(1)  # timedelta(days=i)
+    return {
+        'days': result
+    } 
+    {
+        'days': [
+            {  # Описание одного дня в нашей неделе
+                'weekday': 'ПН',
+                'slots': [
+                    {
+                        'time': '8:00',
+                         'client': ''
+                    },
+                    {
+                        'time': '9:00',
+                        'client': 'Wera'
+                    },
+                    {
+                        'time': '10:00',
+                        'client': ''
+                    },
+                    {
+                        'time': '11:00',
+                        'client': ''
+                    }
+                ]
+            },
+            {
+                'weekday': 'ВТ',
+                'slots': [
+                    {
+                        'time': '8:00',
+                         'client': ''
+                    },
+                    {
+                        'time': '9:00',
+                        'client': ''
+                    },
+                    {
+                        'time': '10:00',
+                        'client': ''
+                    },
+                    {
+                        'time': '11:00',
+                        'client': ''
+                    }
+                ]
+            },
+            {
+                'weekday': 'СР',
+                'slots': [
+                    {
+                        'time': '8:00',
+                         'client': ''
+                    },
+                    {
+                        'time': '9:00',
+                        'client': ''
+                    },
+                    {
+                        'time': '10:00',
+                        'client': ''
+                    },
+                    {
+                        'time': '11:00',
+                        'client': ''
+                    }
+                ]
+            }
+            ]
+    }
