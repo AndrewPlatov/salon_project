@@ -1,59 +1,46 @@
-import asyncio       # библиотека для работы с асинхронными (параллельными) функциями
-from aiogram import Bot, Dispatcher  # библиотека для бота: класс бота и класс диспетчера (управляющий класс)
+import asyncio
+from aiogram import Bot, Dispatcher
+from aiogram.types import Message
 from aiogram.filters import Command
 
-# Django settings
+# Django setup
 import os
-os.environ.setdefault(
-    'DJANGO_SETTINGS_MODULE',
-    'salon.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'salon.settings')
 import django
 django.setup()
 
-from bookings.models import Booking
+from bookings.models import Booking, MessageRecord
 
 from asgiref.sync import sync_to_async
-@sync_to_async
-def get_data():
-    return
-list(Booking.objects.all())
-
-from salon.secret import TOKEN
-dp = Dispatcher()         # Создание управляющего объекта.
-bot = Bot(token=TOKEN)    # Создается объект бота с нашим паролем. Один бот - один экземпляр на токен.
-# Команду в бот необходимо вводить так: /start
-@dp.message(Command("start"))
-async def command_start_handler(message):
-    print('Ура! Мне написал', message.chat.id)
-    data = await get_data()
-    print(data)
-    await message.answer(
-        "Ты написал:" + message.text)
-asyncio.run(           # Запуск асинхронной функции
-    dp.start_polling(  # диспетчер начинает обмен сообщениями, 
-        bot))          # используя бот
-# "работа" его - ничего не делать, только ожидать сообщения
-
-from bookings.models import Booking
 
 @sync_to_async
-def get_tasks():
+def save_message(user_id, text):
+    msg_record = MessageRecord(user_id=user_id, message_text=text)
+    msg_record.save()
+    return msg_record
+
+@sync_to_async
+def get_all_bookings():
     return list(Booking.objects.all())
 
-@dp.message(Command("whatsnew"))
-async def handle_whatsnew(message):
-    tasks = await get_tasks()
-    if not tasks:
-        await message.answer("Нет новых задач.")
-        return
+from salon.secret import TOKEN
 
-    data_lines = []
-    for task in tasks:
-        line = f"Задача: {task.title}, Дедлайн: {task.deadline.strftime('%Y-%m-%d')}"
-        data_lines.append(line)
+bot = Bot(token=TOKEN)
+dp = Dispatcher()
 
-    data_text = "\n".join(data_lines)
-    await message.answer(data_text)
+@dp.message(Command("start"))
+async def command_start_handler(message: Message):
+    print('Ура! Мне написал', message.chat.id)
+    data = await get_all_bookings()
+    print(data)
+    await message.answer("Привет! Отправьте мне сообщение, и я сохраню его в базу данных.")
+
+# Обработка всех сообщений (не команд)
+@dp.message()
+async def handle_message(message: Message):
+    await save_message(user_id=message.from_user.id, text=message.text)
+    await message.answer("Ваше сообщение сохранено!")
 
 if __name__ == '__main__':
-    asyncio.run(dp.start_polling())
+    from aiogram import executor
+    executor.start_polling(dp)

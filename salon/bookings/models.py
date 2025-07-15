@@ -37,7 +37,6 @@ class Post(models.Model):
 
     def __str__(self):
         return f"Пост {self.id} от {self.author.username}"
-    
 
 
 class Task(models.Model):
@@ -59,3 +58,9 @@ class Task(models.Model):
 
     def __str__(self):
         return self.title
+    
+
+class MessageRecord(models.Model):
+    user_id = models.IntegerField()
+    message_text = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)

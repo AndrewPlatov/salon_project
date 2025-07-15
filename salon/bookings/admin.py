@@ -1,12 +1,17 @@
 from django.contrib import admin
-from .models import Subscription, Post
+from . import models
 
-@admin.register(Subscription)
+@admin.register(models.Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ('subscriber', 'subscribed_to', 'created_at')
     search_fields = ('subscriber__username', 'subscribed_to__username')
 
-@admin.register(Post)
+@admin.register(models.Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = ('author', 'created_at')
     search_fields = ('author__username',)
+
+@admin.register(models.Booking)
+class PostAdmin(admin.ModelAdmin):
+    list_display = ('user', 'master', 'start_time', 'end_time')
+    #search_fields = ('author__username',)

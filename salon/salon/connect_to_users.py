@@ -27,30 +27,49 @@ asyncio.run(           # Запуск асинхронной функции
 # "работа" его - ничего не делать, только ожидать сообщения
 
 
-@dp.message_handler(commands=['writeme'])
-async def handle_writeme(message: types.Message):
-    text = message.text
-    match = re.search(r'/writeme\s+(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})', text)
-    if not match:
-        await message.reply("Используйте формат: /writeme ГГГГ-ММ-ДД ЧЧ:ММ")
-        return
-    
-    date_str, time_str = match.groups()
-    target_time = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
-    now = datetime.now()
-    delay = (target_time - now).total_seconds()
-    
-    if delay <= 0:
-        await message.reply("Это время уже прошло.")
-        return
-    
-    await message.reply(f"Я напомню вам в {target_time.strftime('%Y-%m-%d %H:%M')}")
-    
-    await asyncio.sleep(delay)
-    await message.answer(f"Ты просил тебя разбудить в {target_time.strftime('%Y-%m-%d %H:%M')}.")
+import asyncio
+from aiogram import Bot, Dispatcher
+from aiogram.types import Message
+from aiogram.filters import Command
 
-async def main():
-    await dp.start_polling()
+# Django setup
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bookings.settings')
+import django
+django.setup()
+
+from bookings.models import Booking, MessageRecord
+
+from asgiref.sync import sync_to_async
+
+@sync_to_async
+def save_message(user_id, text):
+    msg_record = MessageRecord(user_id=user_id, message_text=text)
+    msg_record.save()
+    return msg_record
+
+@sync_to_async
+def get_all_bookings():
+    return list(Booking.objects.all())
+
+from salon.secret import TOKEN
+
+bot = Bot(token=TOKEN)
+dp = Dispatcher()
+
+@dp.message(Command("start"))
+async def command_start_handler(message: Message):
+    print('Ура! Мне написал', message.chat.id)
+    data = await get_all_bookings()
+    print(data)
+    await message.answer("Привет! Отправьте мне сообщение, и я сохраню его в базу данных.")
+
+# Обработка всех сообщений (не команд)
+@dp.message()
+async def handle_message(message: Message):
+    await save_message(user_id=message.from_user.id, text=message.text)
+    await message.answer("Ваше сообщение сохранено!")
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    from aiogram import executor
+    executor.start_polling(dp)
