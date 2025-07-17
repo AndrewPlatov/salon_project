@@ -1,5 +1,6 @@
 from django.contrib import admin
 from . import models
+from .models import Master
 
 @admin.register(models.Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
@@ -15,3 +16,9 @@ class PostAdmin(admin.ModelAdmin):
 class PostAdmin(admin.ModelAdmin):
     list_display = ('user', 'master', 'start_time', 'end_time')
     #search_fields = ('author__username',)
+
+
+@admin.register(Master)
+class MasterAdmin(admin.ModelAdmin):
+    list_display = ('name', 'specialty', 'experience_years')
+    search_fields = ('name', 'specialty')

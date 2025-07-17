@@ -64,3 +64,13 @@ class MessageRecord(models.Model):
     user_id = models.IntegerField()
     message_text = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    
+
+class Master(models.Model):
+    name = models.CharField(max_length=100, verbose_name='Имя мастера')
+    specialty = models.CharField(max_length=100, verbose_name='Специальность')
+    experience_years = models.PositiveIntegerField(verbose_name='Опыт (лет)')
+    photo = models.ImageField(upload_to='masters/', null=True, blank=True, verbose_name='Фотография')
+
+    def __str__(self):
+        return self.name

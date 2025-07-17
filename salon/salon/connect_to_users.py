@@ -73,3 +73,29 @@ async def handle_message(message: Message):
 if __name__ == '__main__':
     from aiogram import executor
     executor.start_polling(dp)
+
+
+
+
+
+from bookings.models import Master
+
+@dp.message_handler(commands=['masters'])
+async def show_masters(message: types.Message):
+    masters = Master.objects.all()
+    if not masters:
+        await message.answer("Мастера еще не добавлены.")
+        return
+    
+    response = "Мастера салона:\n"
+    for master in masters:
+        response += f"\n{master.name} - {master.specialty} ({master.experience_years} лет)\n"
+        if master.photo:
+            await message.answer_photo(photo=master.photo, caption=response)
+            response = ""  # чтобы не дублировать текст после фото
+        else:
+            await message.answer(response)
+            response = ""
+
+if __name__ == '__main__':
+    executor.start_polling(dp)
